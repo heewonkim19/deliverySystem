@@ -52,6 +52,7 @@ static void printStorageInside(int x, int y) {
 //and allocate memory to the context pointer
 //int x, int y : cell coordinate to be initialized
 static void initStorage(int x, int y) {
+	// allocate 사용 
 	
 }
 
@@ -59,7 +60,7 @@ static void initStorage(int x, int y) {
 //int x, int y : cell for password check
 //return : 0 - password is matching, -1 - password is not matching
 static int inputPasswd(int x, int y) {
-	
+	// deliverySystem[x][y].passwd	사용
 }
 
 
@@ -81,6 +82,16 @@ int str_backupSystem(char* filepath) {
 //char* filepath : filepath and name to read config parameters (row, column, master password, past contexts of the delivery system
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
+	
+		FILE *fp;
+	fp = fopen(filepath, "r");
+	
+	if (fp == NULL)
+		return -1;
+	else
+		return 0; 
+	
+	fclose(fp);
 	
 }
 
@@ -149,6 +160,17 @@ int str_checkStorage(int x, int y) {
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) {
 	
+	FILE *fp;
+	
+	fopen("STORAGE_FILEPATH", "a+"); // a인지 a+인지 확인하기   
+	
+	fprintf(fp, "\n%d %d %d %d %4s %100s", &x, &y, &nBuilding, &nRoom, &passwd[PASSWD_LEN+1], &msg[MAX_MSG_SIZE+1]);
+	
+	fclose(fp);
+	
+	
+	return 0;
+
 }
 
 
@@ -158,10 +180,12 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //int x, int y : coordinate of the cell to extract
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
+	
 	if (deliverySystem[x][y].cnt > 0)
 		return -1;
 	else 
 		return 0;
+
 }
 
 //find my package from the storage
@@ -169,6 +193,9 @@ int str_extractStorage(int x, int y) {
 //int nBuilding, int nRoom : my building/room numbers
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
+
+	FILE *fp;	
 	
 	return cnt;
+
 }
