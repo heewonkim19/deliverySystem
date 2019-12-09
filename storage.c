@@ -36,6 +36,7 @@ static char masterPassword[PASSWD_LEN+1];	//master password
 //print the inside context of a specific cell
 //int x, int y : cell to print the context
 static void printStorageInside(int x, int y) {
+	
 	printf("\n------------------------------------------------------------------------\n");
 	printf("------------------------------------------------------------------------\n");
 	if (deliverySystem[x][y].cnt > 0)
@@ -45,6 +46,7 @@ static void printStorageInside(int x, int y) {
 		
 	printf("------------------------------------------------------------------------\n");
 	printf("------------------------------------------------------------------------\n\n");
+
 }
 
 //initialize the storage
@@ -52,8 +54,10 @@ static void printStorageInside(int x, int y) {
 //and allocate memory to the context pointer
 //int x, int y : cell coordinate to be initialized
 static void initStorage(int x, int y) {
-	storage_t storage = {};
+
+	storage_t storage = { .building = 0, .room = 0, .cnt = 0};
 	deliverySystem[x][y] = storage;
+
 }
 
 //get password input and check if it is correct for the cell (x,y)
@@ -66,15 +70,13 @@ static int inputPasswd(int x, int y) {
 	scanf("%4s", &passwd);
 	fflush(stdin);
 	
-	if(deliverySystem[x][y].passwd == passwd) {
+	if(strcmp(deliverySystem[x][y].passwd,passwd) == 0) {
 		return 0;
 	} else {
 		return -1;
 	}
+
 }
-
-
-
 
 
 // ------- API function for main.c file ---------------
@@ -83,17 +85,21 @@ static int inputPasswd(int x, int y) {
 //char* filepath : filepath and name to write
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
-	
+
+	FILE *pf = fopen(filepath, "w");
 	int x, y;
 	
-	FILE *pf = fopen(filepath, "w");
-
 	fprintf(pf, "%d %d\n", systemSize[0], systemSize[1]);
 	fprintf(pf, "%s\n", masterPassword);
 
-	for(x=0; x<systemSize[0]; x++) {
-		for(y=0; y<systemSize[1]; y++) {			
-			fprintf(pf, "%d %d %d $d %s %s\n", x, y, deliverySystem[x][y].building, deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
+	for(x=0; x<systemSize[0]; x++) 
+	{
+		for(y=0; y<systemSize[1]; y++) 
+		{		
+			if (deliverySystem[x][y].cnt > 0) 
+			{			
+				fprintf(pf, "%d %d %d %d %s %s\n", x, y, deliverySystem[x][y].building, deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
+			}
 		}
 	}
 
@@ -103,43 +109,55 @@ int str_backupSystem(char* filepath) {
 }
 
 
-
 //create delivery system on the double pointer deliverySystem
 //char* filepath : filepath and name to read config parameters (row, column, master password, past contexts of the delivery system
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
-	
+
 	int i;
-	
+	int x, y;	
+
 	FILE *pf = fopen(filepath, "r");
-	if(pf != NULL) {
+		
+	if(pf != NULL) 
+	{
 
-		fscanf(pf, "%d %d", systemSize[0], systemSize[1]); // row, column
-		fscanf(pf, "%s", masterPassword);	// master
+		fscanf(pf, "%d %d", &systemSize[0], &systemSize[1]);
+		fscanf(pf, "%s", &masterPassword);	
 
-		// deliverySystem
 		deliverySystem = (storage_t **) malloc(systemSize[0] *sizeof(storage_t *));
-		for(i=0; i<systemSize[0]; i++) {
+		for(i=0; i<systemSize[0]; i++) 
+		{
 			deliverySystem[i] = (storage_t *) malloc(systemSize[1] * sizeof(storage_t));
 		}
+		
+		for (x = 0; x < systemSize[0]; x++) 
+		{
+			for (y = 0; y < systemSize[1]; y++) 
+			{
+				initStorage(x, y);
+			}
+		}
 
-		// deliverySystem
 		while(feof(pf) == 0) {
-			storage_t storage = {};
-			int x, y;
+			storage_t storage = { .building = 0, .room = 0, .cnt = 0, .passwd = { "" }, .context = (char*)malloc(sizeof(char) * (MAX_MSG_SIZE + 1)) };
+			int x = -1, y = -1;
+			
+			fscanf(pf, "%d %d %d %d %s %s", &x, &y, &storage.building, &storage.room, &storage.passwd, storage.context);
 
-			fscanf(pf, "%d %d %d $d %s %s", &x, &y, &storage.building, &storage.room, &storage.passwd, &storage.context);
-			storage.cnt = sizeof(storage.context);
-
-			deliverySystem[x][y] = storage;
-			storedCnt++;
+			if (x >= 0 && y >= 0) {
+				storage.cnt = strlen(storage.context);
+				deliverySystem[x][y] = storage;				
+				storedCnt++;				
+			}
 		}
 
 		fclose(pf);
 
-	} else {
+	} 
+	else 
 		return -1;
-	}
+
 
 	return 0;
 }
@@ -149,9 +167,11 @@ void str_freeSystem(void) {
 	
 	int i;
 	
-	for(i=0; i<systemSize[0]; i++) {
+	for(i=0; i<systemSize[0]; i++) 
+	{
 		free(deliverySystem[i]);
 	}
+	
 	free(deliverySystem);
 }
 
@@ -189,7 +209,6 @@ void str_printStorageStatus(void) {
 }
 
 
-
 //check if the input cell (x,y) is valid and whether it is occupied or not
 int str_checkStorage(int x, int y) {
 	if (x < 0 || x >= systemSize[0])
@@ -214,19 +233,20 @@ int str_checkStorage(int x, int y) {
 //char passwd[] : password string (4 characters)
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) {
+	
+	storage_t storage = { .building = 0, .room = 0, .cnt = 0 };	
+	initStorage(x, y);
+	deliverySystem[x][y].building = nBuilding;
+	deliverySystem[x][y].room = nRoom;
+	strcpy(deliverySystem[x][y].passwd, passwd);
+	deliverySystem[x][y].context = msg;
+	deliverySystem[x][y].cnt = sizeof(deliverySystem[x][y].context);
 
-	storage_t storage = {};
-	storage.building = nBuilding;
-	storage.room = nRoom;
-	storage.context = msg;
-	strcpy(storage.passwd, passwd);
-	storage.cnt = sizeof(storage.context);
-	deliverySystem[x][y] = storage;
-
-	if(deliverySystem[x][y].cnt <= 0) {
+	if(deliverySystem[x][y].cnt <= 0) 
 		return -1;
-	}
+	
 	storedCnt++;
+	
 	return 0;
 }
 
@@ -238,26 +258,15 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
 
-	// 수정하기
-	 
-	if(inputPasswd(x,y) == 0) {
-
-		printf(" -----------> extracting the storage (%i, %i)...\n\n\n",x,y);
-		printf("------------------------------------------------------------------------");
-		printf("------------------------------------------------------------------------");
-		printf("<<<<<<<<<<<<<<<<<<<<<<<< : %s >>>>>>>>>>>>>>>>>>>>>>>>>>>>", deliverySystem[x][y].context);
-		printf("------------------------------------------------------------------------");
-		printf("------------------------------------------------------------------------");
-
+	if(inputPasswd(x,y) == 0) 
+	{
+		printStorageInside(x,y);
 		initStorage(x,y);
 		storedCnt--;
-	
-	} else {
-		printf(" -----------> password is wrong!!\n");
-		printf(" -----------> Failed to extract my package!\n");
+	} 
+	else 
 		return -1;
-	}
-	
+
 	return 0;
 }
 
@@ -270,10 +279,13 @@ int str_findStorage(int nBuilding, int nRoom) {
 	int x, y;
 	int cnt = 0;
 	
-	for(x=0; x<systemSize[0]; x++) {
-		for(y=0; y<systemSize[1]; y++) {
-			if(deliverySystem[x][y].building==nBuilding && deliverySystem[x][y].room==nRoom) {
-				printf(" -----------> Found a package in (%i, %i)\n",x,y);
+	for(x=0; x<systemSize[0]; x++)
+	{
+		for(y=0; y<systemSize[1]; y++) 
+		{
+			if(deliverySystem[x][y].building == nBuilding && deliverySystem[x][y].room == nRoom) 
+			{
+				printf(" -----------> Found a package in (%i, %i)\n", x, y);
 				cnt++;
 			}
 		}
