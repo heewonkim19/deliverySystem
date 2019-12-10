@@ -59,7 +59,6 @@ int main(int argc, char *argv[]) {
 		printf("failed to open storage config file! (%s)\n", STORAGE_FILEPATH);
 		return -1;
 	}
-	
 	printf("------- Unmanned Delivery Storage System START -------\n");
 	
 	do
