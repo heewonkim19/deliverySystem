@@ -44,7 +44,6 @@ static void printStorageInside(int x, int y)
 		printf("<<<<<<<<<<<<<<<<<<<<<<<< : %s >>>>>>>>>>>>>>>>>>>>>>>>>>>>\n", deliverySystem[x][y].context);
 	else
 		printf("<<<<<<<<<<<<<<<<<<<<<<<< empty >>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-		
 	printf("------------------------------------------------------------------------\n");
 	printf("------------------------------------------------------------------------\n\n");
 
@@ -57,8 +56,8 @@ static void printStorageInside(int x, int y)
 static void initStorage(int x, int y) 
 {
 
-	storage_t storage = { .building = 0, .room = 0, .cnt = 0 };
-	deliverySystem[x][y] = storage;
+	storage_t storage = { .building = 0, .room = 0, .cnt = 0 };	
+	deliverySystem[x][y] = storage;																	
 
 }
 
@@ -74,7 +73,7 @@ static int inputPasswd(int x, int y)
 	scanf("%4s", &passwd);																					// scan password
 	fflush(stdin);
 	
-	if(strcmp(deliverySystem[x][y].passwd,passwd) == 0 || strcmp(masterPassword, passwd) == 0) 				// Compare Passwords Matches
+	if(strcmp(deliverySystem[x][y].passwd, passwd) == 0 || strcmp(masterPassword, passwd) == 0) 			// Compare Passwords Matches
 		return 0; 
 	else 
 		return -1;
@@ -295,7 +294,7 @@ int str_findStorage(int nBuilding, int nRoom)
 {
 	
 	int x, y;
-	int cnt = 0;
+	int cnt = 0;																						// Variables that tell if there is or is not a package
 	
 	for(x=0; x<systemSize[0]; x++)
 	{
