@@ -250,15 +250,14 @@ int str_checkStorage(int x, int y)
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) 
 {
-		
-	if(deliverySystem[x][y].cnt > 0)									// If fail to push 
-		return -1;														// return -1
-
 	deliverySystem[x][y].building = nBuilding;							// Input nBuilding to deliverySystem[x][y].building
 	deliverySystem[x][y].room = nRoom;									// Input nRoom to deliverySystem[x][y].room
 	strcpy(deliverySystem[x][y].passwd, passwd);						// copy passwd to deliverysystem's passwd 					
 	deliverySystem[x][y].context = msg;									// Input msg to deliverySystem[x][y].context
 	deliverySystem[x][y].cnt = sizeof(deliverySystem[x][y].context);	// Input size of context to cnt 
+
+	if(deliverySystem[x][y].cnt <= 0)									// If fail to push 
+		return -1;														// return -1
 
 	storedCnt++;														// If success to push, add +1 to storedCnt
 	
