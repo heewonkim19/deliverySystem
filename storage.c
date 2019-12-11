@@ -71,10 +71,10 @@ static int inputPasswd(int x, int y)
 	char passwd[PASSWD_LEN+1];
 	
 	printf(" input password for (%i, %i) storage : ", x, y);												
-	scanf("%4s", &passwd);																					//scan password
+	scanf("%4s", &passwd);																					// scan password
 	fflush(stdin);
 	
-	if(strcmp(deliverySystem[x][y].passwd, passwd) == 0 || (deliverySystem[x][y].passwd, masterPassword)) 	// Compare Passwords Matches
+	if(strcmp(deliverySystem[x][y].passwd,passwd) == 0 || strcmp(masterPassword, passwd) == 0) 				// Compare Passwords Matches
 		return 0; 
 	else 
 		return -1;
